@@ -15,10 +15,9 @@
 *
 *  Volvo On Call (VOC) Driver v2
 *
-*  Created By: Andrew Filby
-*  Enhanced By: Craig Trunzo
+*  Author: Andrew Filby
 *
-*  Date: 2019-11-05
+*  Date: 2019-02-18
 *
 *  Features:
 *   - Provides an implementation of the Volvo On Call facilities for Hubitat
@@ -28,7 +27,7 @@
 *
 ***********************************************************************************************************************/
 
-public static String version()      {  return "v1.1.0"  }
+public static String version()      {  return "v1.0.1"  }
 
 /***********************************************************************************************************************
 *
@@ -45,7 +44,6 @@ import groovy.transform.Field
 metadata    {
     definition (name: "Volvo On Call (VOC) Driver v2", namespace: "filby", author: "Andrew Filby")  {
 		
-		capability "Actuator"
 		capability "Refresh"
 		capability "Sensor"
         capability "Presence Sensor"
@@ -374,7 +372,7 @@ private getVOCdata() {
 	
     def now = new Date().format('yyyy-MM-dd HH:mm', location.timeZone)
     sendEvent(name: "lastVOCupdate", value: now, displayed: true)
-	sendEvent(name: "averageFuelConsumption", value: obs.averageFuelConsumption, displayed: true)
+	sendEvent(name: "averageFuelConsumption", value: convertFuelConsumption(obs.averageFuelConsumption), displayed: true)
 	sendEvent(name: "averageSpeed", value: convertKtoM(obs.averageSpeed), displayed: true)
 	sendEvent(name: "brakeFluid", value: obs.brakeFluid, displayed: true)
 	sendEvent(name: "carLocked", value: obs.carLocked, displayed: true)
@@ -539,17 +537,28 @@ private double convertKtoM(double kvalue) {
 
 private double convertKtoMOdo(double kvalue) {
 	if (convertToImperial == "Yes") {
-		return (Math.round((kvalue / 1.609344)) / 100)
+		return (Math.round((kvalue / 10) / 1.609344) / 100)
+//        return (kvalue / 100)
 	}
 	else {	
 		return kvalue
 	}
 }
+
 private double convertLtoG(double kvalue) {
 	if (convertToImperial == "Yes") {
 		return (Math.round((kvalue / 3.785411) * 100) / 100)
 	}
 	else {
+		return kvalue
+	}
+}
+
+private double convertFuelConsumption(double kvalue) {
+	if (convertToImperial == "Yes") {
+		return ((Math.round(235.215 / (kvalue / 1000))) / 100)
+	}
+	else {	
 		return kvalue
 	}
 }
