@@ -45,6 +45,7 @@ import groovy.transform.Field
 metadata    {
     definition (name: "Volvo On Call (VOC) Driver v2", namespace: "filby", author: "Andrew Filby")  {
 		
+		capability "Actuator"
 		capability "Refresh"
 		capability "Sensor"
         capability "Presence Sensor"
