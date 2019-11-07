@@ -15,9 +15,10 @@
 *
 *  Volvo On Call (VOC) Driver v2
 *
-*  Author: Andrew Filby
+*  Created By: Andrew Filby
+*  Enhanced By: Craig Trunzo
 *
-*  Date: 2019-02-18
+*  Date: 2019-11-05
 *
 *  Features:
 *   - Provides an implementation of the Volvo On Call facilities for Hubitat
@@ -27,7 +28,7 @@
 *
 ***********************************************************************************************************************/
 
-public static String version()      {  return "v1.0.1"  }
+public static String version()      {  return "v1.1.0"  }
 
 /***********************************************************************************************************************
 *
@@ -44,6 +45,7 @@ import groovy.transform.Field
 metadata    {
     definition (name: "Volvo On Call (VOC) Driver v2", namespace: "filby", author: "Andrew Filby")  {
 		
+		capability "Actuator"
 		capability "Refresh"
 		capability "Sensor"
         capability "Presence Sensor"
@@ -291,27 +293,27 @@ def postVOC(command, addtparams="") {
 		return
 	}
 	
-// Use the service URL to obtain the status, this is unnecessary
-//	def service_url = obs.service
-//	params = getURL(service_url)
+																
+								
+							   
+ 
+		
+							  
+										 
+																						
+	 
+																					   
+
+				
+									   
+		  
 	
-//	try {
-//		httpGet(params)		{ resp ->
-//		if (resp?.data)     obs << resp.data;
-//			else                log.error "http call for VOC api did not return data: ${resp}";
-//		}
-//	} catch (e) { log.error "httpGet call failed for VOC api command ${command}: ${e}" }
+		  
 
-//	if (!obs)   {
-//		log.warn "No response from VOC API"
-//		return
-//	}
-//	log obs
-
-//	if (obs.status != "Started" && obs.status != "Successful" && obs.status != "MessageDelivered") {
-//		log.warn "Message ${command} not delivered, status = ${obs.status}"
-//		return
-//	}
+																								   
+																	   
+		  
+	
 	log.info "${device.displayName} ${command} command status : ${obs.status}"
 	
 }
@@ -538,7 +540,7 @@ private double convertKtoM(double kvalue) {
 private double convertKtoMOdo(double kvalue) {
 	if (convertToImperial == "Yes") {
 		return (Math.round((kvalue / 10) / 1.609344) / 100)
-//        return (kvalue / 100)
+							   
 	}
 	else {	
 		return kvalue
