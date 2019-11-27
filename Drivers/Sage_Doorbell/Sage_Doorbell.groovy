@@ -30,10 +30,18 @@
  *  HE Conversion: CraigTrunzo
  *	Date: 2019-11-23
  *
+ *	Changelog:
+ *
+ *  1.0.0 (11/27/2019) - Converted to a standardized HE Driver and added parameter names for buttons
+ *  0.40 (03/23/2017) - set numberOfButtons attribute for those smart apps that rely on this
+ *  0.30 (11/20/2016) - Removed non-operational battery capability; was preventing device display on 2.2.2 mobile app
+ *  0.20 (08/02/2016) - Added preference option for allowed time between presses to eliminate duplicate notifications on some systems
+ *  0.10 (06/13/2016) - Initial 0.1 pre-beta Test Code
+
  */
  
 metadata {
-	definition (name: "SAGE Doorbell Sensor", namespace: "darwinsden", author: "darwin@darwinsden.com") {
+	definition (name: "SAGE Doorbell Sensor", namespace: "trunzoc", author: "Craig Trunzo") {
     	//capability "Battery"
 		capability "Configuration"
         capability "Pushable Button"
