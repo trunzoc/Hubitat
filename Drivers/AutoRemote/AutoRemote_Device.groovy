@@ -13,7 +13,7 @@
 *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
 *  for the specific language governing permissions and limitations under the License.
 * 		
-* This driver uses sections of code derived from the original Pushover Driver that @ogiewon and I worked on. Thanks for you contributions Dan.
+* This driver uses sections of code derived from the original Join Driver that @stephack wrote. Thanks for you contributions.
 *
 *	12/10/19 	- Initial Release
 *
@@ -29,7 +29,7 @@ preferences {
 }
 
 metadata {
-  	definition (name: "AutoRemote Device", namespace: "trunzoc", author: "Craig Trunzo", importUrl: "") {
+  	definition (name: "AutoRemote Device", namespace: "trunzoc", author: "Craig Trunzo", importUrl: "https://raw.githubusercontent.com/trunzoc/Hubitat/master/Drivers/AutoRemote/AutoRemote_Device.groovy") {
     	capability "Actuator"
         
         command "sendMessage", ["Text*"]
@@ -55,12 +55,7 @@ def sendMessage(message) {
 	
 	if(logEnable) log.debug "Text params: ${params}"
   	
-    //if ((personalkey =~ /[A-Za-z0-9]{30}/)) {
     	asynchttpPost('myPostResponse', params)
-  	//}
-  	//else {
-    //	log.error "Personal key '${personalkey}' is not properly formatted!"
-    //}
 }
 
 def myPostResponse(response,data){
