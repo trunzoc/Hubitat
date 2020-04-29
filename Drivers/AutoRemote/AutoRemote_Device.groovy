@@ -15,12 +15,13 @@
 * 		
 * This driver uses sections of code derived from the original Join Driver that @stephack wrote. Thanks for you contributions.
 *
-*	12/10/19 	- Initial Release
-*
+*	12/10/2019 	- Initial Release
+*	04/29/2020	- Added message prefix
+*			- Added URLEncode
 *
 */
 
-def version() {"v1.0.0"}
+def version() {"v1.1.0"}
 
 preferences {
 	input("personalkey", "text", title: "AutoRemote Personal Key: <small><a href='https://joaoapps.com/autoremote/personal/' target='_blank'>[AutoRemote docs here]</a></small>", required: true, description: "")
