@@ -25,6 +25,7 @@ def version() {"v1.0.0"}
 preferences {
 	input("personalkey", "text", title: "AutoRemote Personal Key: <small><a href='https://joaoapps.com/autoremote/personal/' target='_blank'>[AutoRemote docs here]</a></small>", required: true, description: "")
 	input("sender", "text", title: "Sender (optional)", required: false, description: "Optional text to send as the 'Sender' for this device.")
+	input("messageprefix", "text", title: "Message Prefix (optional)", required: false, description: "Adds '{Message Prefix}=:=' before the text to be send.")
     input("logEnable", "bool", title: "Enable Debug Logging?:", required: true)
 }
 
@@ -49,8 +50,24 @@ def initialize() {
 }
 
 def sendMessage(message) {
+    def finalMessage = "${message}"
+    
+    if(logEnable) log.debug "messageprefix: " + "${messageprefix}"
+    if(logEnable) log.debug "message: " + "${message}"
+    
+    def messagePref = "${messageprefix}"
+    
+    if(messagePref?.trim()){
+        finalMessage = "${messageprefix}" + "=:=" + "${message}"
+    }
+    if(logEnable) log.debug "final message: " + finalMessage
+ 
+	def encodedMessage = java.net.URLEncoder.encode(finalMessage)
+    
+    if(logEnable) log.debug "urlencoded message: " + "${encodedMessage}"
+
     def params = [
-        uri: "https://autoremotejoaomgcd.appspot.com/sendmessage?key=${personalkey}&sender=${sender}&message=${message}",
+        uri: "https://autoremotejoaomgcd.appspot.com/sendmessage?key=${personalkey}&sender=${sender}&message=" + encodedMessage,
     ]
 	
 	if(logEnable) log.debug "Text params: ${params}"
@@ -61,6 +78,9 @@ def sendMessage(message) {
 def myPostResponse(response,data){
 	if(response.status != 200) {
 		log.error "Received HTTP error ${response.status}. Check your keys!"
+        if(response.hasError()) {
+            log.warn(response.getErrorMessage())
+        }
 	}
     else {
     	if(logEnable) log.debug "Message Received by AutoRemote Server"
