@@ -2,7 +2,7 @@
 *  AutoRemote API Device
 *
 *
-*  Copyright 2019 Craig Trunzo
+*  Copyright 2019-2021 Craig Trunzo
 *
 *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
 *  in compliance with the License. You may obtain a copy of the License at:
@@ -18,10 +18,11 @@
 *	12/10/2019 	- Initial Release
 *	04/29/2020	- Added message prefix
 *			- Added URLEncode
+*   07/06/2021 - Added Notification Capabilities
 *
 */
 
-def version() {"v1.1.0"}
+def version() {"v1.2.0"}
 
 preferences {
 	input("personalkey", "text", title: "AutoRemote Personal Key: <small><a href='https://joaoapps.com/autoremote/personal/' target='_blank'>[AutoRemote docs here]</a></small>", required: true, description: "")
@@ -31,8 +32,9 @@ preferences {
 }
 
 metadata {
-  	definition (name: "AutoRemote Device", namespace: "trunzoc", author: "Craig Trunzo", importUrl: "https://raw.githubusercontent.com/trunzoc/Hubitat/master/Drivers/AutoRemote/AutoRemote_Device.groovy") {
-    	capability "Actuator"
+  	definition (name: "AutoRemote Device_new", namespace: "trunzoc", author: "Craig Trunzo", importUrl: "https://raw.githubusercontent.com/trunzoc/Hubitat/master/Drivers/AutoRemote/AutoRemote_Device.groovy") {
+     	capability "Notification"
+   	    capability "Actuator"
         
         command "sendMessage", ["Text*"]
   	}
@@ -48,6 +50,58 @@ def updated() {
 
 def initialize() {
     state.version = version()
+}
+
+def deviceNotification(message) {
+    def finalMessage = "${message}"
+    
+    if(logEnable) log.debug "messageprefix: " + "${messageprefix}"
+    if(logEnable) log.debug "message: " + "${message}"
+    
+    def messagePref = "${messageprefix}"
+    
+    if(messagePref?.trim()){
+        finalMessage = "${messageprefix}" + "=:=" + "${message}"
+    }
+    if(logEnable) log.debug "final message: " + finalMessage
+ 
+	def encodedMessage = java.net.URLEncoder.encode(finalMessage)
+    
+    if(logEnable) log.debug "urlencoded message: " + "${encodedMessage}"
+
+    def params = [
+        uri: "https://autoremotejoaomgcd.appspot.com/sendmessage?key=${personalkey}&sender=${sender}&message=" + encodedMessage,
+    ]
+	
+	if(logEnable) log.debug "Text params: ${params}"
+  	
+    	asynchttpPost('myPostResponse', params)    
+
+}
+
+def sendText(message) {
+    if (deviceNames) { log.info "Sending Text: '${message}' to Device: $deviceNames"}
+	
+	if(deviceNames && deviceNames instanceof List) {
+		deviceNames = deviceNames.join(',')
+	}
+    def apiParams = ["apikey":apikey,"deviceNames":deviceNames, "text":message]
+	
+    def params = [
+        uri: "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush?",
+		requestContentType: 'application/json',
+		contentType: 'application/json',
+		body : apiParams
+    ]
+	
+	if(logEnable) log.debug "Text params: ${params}"
+  	
+    if ((apikey =~ /[A-Za-z0-9]{30}/)) {
+    	asynchttpPost('myPostResponse', params)
+  	}
+  	else {
+    	log.error "API key '${apikey}' is not properly formatted!"
+    }
 }
 
 def sendMessage(message) {
