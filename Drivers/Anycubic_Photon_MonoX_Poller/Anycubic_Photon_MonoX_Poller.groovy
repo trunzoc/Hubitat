@@ -43,6 +43,8 @@ metadata {
 preferences() {    	
         section(""){
             input "ipaddress", "text", required: true, title: "IP/Host", defaultValue: "0.0.0.0"
+            input "delayCheckIdle", "number", title:"Number of seconds between checking printer while idle", description: "", required: true, displayDuringSetup: true, defaultValue: "300"
+            input "delayCheckPrinting", "number", title:"Number of seconds between checking printer while printing", description: "", required: true, displayDuringSetup: true, defaultValue: "60"
             input "logEnable", "bool", title: "Enable logging", required: true, defaultValue: true
         }
     }
@@ -73,11 +75,11 @@ def sendMsg(msg) {
         interfaces.rawSocket.connect("${ipaddress}", 6000)
 
 		//give it a chance to start
-		pauseExecution(1000)
+		//pauseExecution(1000)
 		if(logEnable) log.debug "Connection established"
 		sendEvent([name: "Connection", value: "Connection established"])
 
-		pauseExecution(1000)
+		//pauseExecution(1000)
         if(logEnable) log.debug "Sending Message: ${msg}"
         interfaces.rawSocket.sendMessage("${msg}")        
 		sendEvent([name: "Connection", value: "Message Sent"])
@@ -117,6 +119,7 @@ def parse(String msg) {
         
         if (strResults[0] == "getstatus") {
             if (strResults[1] == "print") {
+                state.IsPrintng = true
                 sendEvent(name: "contact", value: "open")
                 sendEvent(name: "LastStatusDate", value: dateNow)
                 sendEvent(name: "CurrentStatus", value: strResults[1])
@@ -129,6 +132,7 @@ def parse(String msg) {
                 sendEvent(name: "TotalVolume", value: strResults[8])
                 sendEvent(name: "LayerHeight", value: strResults[11])
             } else {
+                state.IsPrintng = false
                 sendEvent(name: "contact", value: "close")
                 sendEvent(name: "LastStatusDate", value: dateNow)
                 sendEvent(name: "CurrentStatus", value: "Not Printing")
@@ -159,11 +163,18 @@ def parse(String msg) {
 		log.debug "parse error: ${e}"
 	}
     
-    pauseExecution(1000)
+    //pauseExecution(1000)
     sendEvent([name: "Connection", value: "Closing"])
     interfaces.rawSocket.close()
 
-    pauseExecution(1000)
+    //pauseExecution(1000)
     if(logEnable) log.debug "Connection Closed"
     sendEvent([name: "Connection", value: "Closed"])
+
+    //SET DELAY FOR NEXT CHECK
+    if(state.isPrinting){
+		if (autoUpdate) runIn(delayCheckPrinting.toInteger(), CheckPrinter)
+	} else {
+		if (autoUpdate) runIn(delayCheckIdle.toInteger(), CheckPrinter)
+	}
 }
