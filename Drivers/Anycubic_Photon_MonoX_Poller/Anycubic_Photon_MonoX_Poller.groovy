@@ -22,7 +22,7 @@ def version() {"v1.0.20230501"}
 
 
 metadata {
-	definition (name: "Anycubic Photon Mono X Poller", namespace: "trunzoc", author: "Craig Trunzo", importUrl: "") {
+	definition (name: "Anycubic Photon Mono X Poller", namespace: "trunzoc", author: "Craig Trunzo", importUrl: "https://raw.githubusercontent.com/trunzoc/Hubitat/master/Drivers/Anycubic_Photon_MonoX_Poller/Anycubic_Photon_MonoX_Poller.groovy") {
 		capability "Contact Sensor"
         capability "PresenceSensor"
 
