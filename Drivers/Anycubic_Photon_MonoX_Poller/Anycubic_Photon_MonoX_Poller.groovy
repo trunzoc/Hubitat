@@ -1,0 +1,169 @@
+/**
+ *  ****************  Anycubic Photon Mono X Poller  ****************
+*   
+*   File: Anycubic_Photon_MonoX_Poller.groovy
+*   Platform: Hubitat
+*   Modification History:
+*       Date       Who                   What
+*       2023-05-01 Craig Trunzo          Built it
+*
+*  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License. You may obtain a copy of the License at:
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+*  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+*  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+*  for the specific language governing permissions and limitations under the License.
+*
+*
+*/
+def version() {"v1.0.20230501"}
+
+
+metadata {
+	definition (name: "Anycubic Photon Mono X Poller", namespace: "trunzoc", author: "Craig Trunzo", importUrl: "") {
+		capability "Contact Sensor"
+        capability "PresenceSensor"
+
+	    command "GetStatus"
+
+        attribute "LastStatusDate", "string"
+        attribute "CurrentStatus", "string"
+        attribute "CurrentFile", "string"
+        attribute "TotalLayers", "number"
+        attribute "CurrentLayer", "number"
+        attribute "PercentComplete", "string"
+        attribute "SecondsEstimated", "number"
+		attribute "SecondsActive", "number"
+        attribute "TotalVolume", "string"
+		attribute "LayerHeight", "string"
+}
+    
+preferences() {    	
+        section(""){
+            input "ipaddress", "text", required: true, title: "IP/Host", defaultValue: "0.0.0.0"
+            input "logEnable", "bool", title: "Enable logging", required: true, defaultValue: true
+        }
+    }
+}
+
+def installed () {
+	log.info "${device.displayName}.installed()"
+    updated()
+}
+
+
+def updated () {
+	log.info "${device.displayName}.updated()"
+    
+    runEvery1Minute(GetStatus)
+    runIn(2, GetStatus)
+}
+
+def sendMsg(msg) {
+	try {
+        def dateNow = new Date()
+		dateNow = dateNow.format("yyyy-MM-dd HH:mm:ss") 
+        state.LastAttempt = dateNow
+
+        if(logEnable) log.debug "Opening connection"
+		sendEvent([name: "Connection", value: "Opening"])
+		
+        interfaces.rawSocket.connect("${ipaddress}", 6000)
+
+		//give it a chance to start
+		pauseExecution(1000)
+		if(logEnable) log.debug "Connection established"
+		sendEvent([name: "Connection", value: "Connection established"])
+
+		pauseExecution(1000)
+        if(logEnable) log.debug "Sending Message: ${msg}"
+        interfaces.rawSocket.sendMessage("${msg}")        
+		sendEvent([name: "Connection", value: "Message Sent"])
+        sendEvent(name: "presence", value: "present")
+        
+    } catch(e) {
+		if(logEnable) 
+		{
+			log.debug "Initialize Error: ${e.message}"
+			log.debug "(${ipaddress}, 6000)"
+		}
+		sendEvent([name: "Connection", value: "Connection Failed"])
+        sendEvent(name: "presence", value: "not present")
+        state.LastResult = "Connection Failed: ${e.message}"
+    }
+
+}
+
+def GetStatus() {
+    sendMsg("getstatus")
+}
+
+def parse(String msg) {
+	try {
+		sendEvent([name: "Connection", value: "Response Received"])
+
+        byte[] bytes = hubitat.helper.HexUtils.hexStringToByteArray(msg)
+        def newstring = new String(bytes)
+
+        def dateNow = new Date()
+		dateNow = dateNow.format("yyyy-MM-dd HH:mm:ss") 
+        
+		if(logEnable) log.debug "Response: ${newstring}"
+        
+        String[] strResults;
+        strResults = newstring.split(',');
+        
+        if (strResults[0] == "getstatus") {
+            if (strResults[1] == "print") {
+                sendEvent(name: "contact", value: "open")
+                sendEvent(name: "LastStatusDate", value: dateNow)
+                sendEvent(name: "CurrentStatus", value: strResults[1])
+                sendEvent(name: "CurrentFile", value: strResults[2])
+                sendEvent(name: "TotalLayers", value: strResults[3])
+                sendEvent(name: "CurrentLayer", value: strResults[5])
+                sendEvent(name: "PercentComplete", value: "${strResults[4]}%")
+                sendEvent(name: "SecondsEstimated", value: strResults[7])
+                sendEvent(name: "SecondsActive", value: strResults[6])
+                sendEvent(name: "TotalVolume", value: strResults[8])
+                sendEvent(name: "LayerHeight", value: strResults[11])
+            } else {
+                sendEvent(name: "contact", value: "close")
+                sendEvent(name: "LastStatusDate", value: dateNow)
+                sendEvent(name: "CurrentStatus", value: "Not Printing")
+            
+                sendEvent(name: "CurrentFile", value: "null")
+                sendEvent(name: "TotalLayers", value: "null")
+                sendEvent(name: "CurrentLayer", value: "null")
+                sendEvent(name: "PercentComplete", value: "null")
+                sendEvent(name: "SecondsEstimated", value: "null")
+                sendEvent(name: "SecondsActive", value: "null")
+                sendEvent(name: "TotalVolume", value: "null")
+                sendEvent(name: "LayerHeight", value: "null")
+            
+                device.deleteCurrentState("CurrentFile")
+                device.deleteCurrentState("TotalLayers")
+                device.deleteCurrentState("CurrentLayer")
+                device.deleteCurrentState("PercentComplete")
+                device.deleteCurrentState("SecondsEstimated")
+                device.deleteCurrentState("SecondsActive")
+                device.deleteCurrentState("TotalVolume")
+                device.deleteCurrentState("turned")
+                device.deleteCurrentState("LayerHeight")
+            }
+        }
+        state.LastResult = "success"
+
+    } catch(e) {
+		log.debug "parse error: ${e}"
+	}
+    
+    pauseExecution(1000)
+    sendEvent([name: "Connection", value: "Closing"])
+    interfaces.rawSocket.close()
+
+    pauseExecution(1000)
+    if(logEnable) log.debug "Connection Closed"
+    sendEvent([name: "Connection", value: "Closed"])
+}
