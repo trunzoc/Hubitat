@@ -6,6 +6,7 @@
 *   Modification History:
 *       Date       Who                   What
 *       2023-05-01 Craig Trunzo          Built it
+*       2023-05-09 Craig Trunzo          Added "sysinfo
 *
 *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
 *  in compliance with the License. You may obtain a copy of the License at:
@@ -18,7 +19,7 @@
 *
 *
 */
-def version() {"v1.0.20230501"}
+def version() {"v1.0.20230509"}
 
 
 metadata {
@@ -27,6 +28,7 @@ metadata {
         capability "PresenceSensor"
 
 	    command "GetStatus"
+	    command "SystemInfo"
 
         attribute "LastStatusDate", "string"
         attribute "CurrentStatus", "string"
@@ -58,7 +60,10 @@ def installed () {
 
 def updated () {
 	log.info "${device.displayName}.updated()"
-    
+    runIn(2, SystemInfo)
+
+    pauseExecution(5000)
+
     runEvery1Minute(GetStatus)
     runIn(2, GetStatus)
 }
@@ -102,6 +107,9 @@ def GetStatus() {
     sendMsg("getstatus")
 }
 
+def SystemInfo() {
+    sendMsg("sysinfo")
+}
 def parse(String msg) {
 	try {
 		sendEvent([name: "Connection", value: "Response Received"])
@@ -145,18 +153,14 @@ def parse(String msg) {
                 sendEvent(name: "SecondsActive", value: "null")
                 sendEvent(name: "TotalVolume", value: "null")
                 sendEvent(name: "LayerHeight", value: "null")
-            
-                device.deleteCurrentState("CurrentFile")
-                device.deleteCurrentState("TotalLayers")
-                device.deleteCurrentState("CurrentLayer")
-                device.deleteCurrentState("PercentComplete")
-                device.deleteCurrentState("SecondsEstimated")
-                device.deleteCurrentState("SecondsActive")
-                device.deleteCurrentState("TotalVolume")
-                device.deleteCurrentState("turned")
-                device.deleteCurrentState("LayerHeight")
             }
         }
+	else if (strResults[0] == "sysinfo") {
+			state.Printer_Model = strResults[1]
+			state.Firmware_Version = strResults[2]
+			state.Serial_No = strResults[3]
+			state.WiFi_SSID = strResults[4]
+	}
         state.LastResult = "success"
 
     } catch(e) {
