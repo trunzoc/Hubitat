@@ -6,7 +6,8 @@
 *   Modification History:
 *       Date       Who                   What
 *       2023-05-01 Craig Trunzo          Built it
-*       2023-05-09 Craig Trunzo          Added "sysinfo"
+*       2023-05-09 Craig Trunzo          Added "sysinfo
+*       2023-05-11 Craig Trunzo          changed numeric attributes to strings
 *
 *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
 *  in compliance with the License. You may obtain a copy of the License at:
@@ -19,7 +20,7 @@
 *
 *
 */
-def version() {"v1.0.20230509"}
+def version() {"v1.0.20230511"}
 
 
 metadata {
@@ -33,11 +34,11 @@ metadata {
         attribute "LastStatusDate", "string"
         attribute "CurrentStatus", "string"
         attribute "CurrentFile", "string"
-        attribute "TotalLayers", "number"
-        attribute "CurrentLayer", "number"
+        attribute "TotalLayers", "string"
+        attribute "CurrentLayer", "string"
         attribute "PercentComplete", "string"
-        attribute "SecondsEstimated", "number"
-		attribute "SecondsActive", "number"
+        attribute "SecondsEstimated", "string"
+		attribute "SecondsActive", "string"
         attribute "TotalVolume", "string"
 		attribute "LayerHeight", "string"
 }
@@ -155,12 +156,12 @@ def parse(String msg) {
                 sendEvent(name: "LayerHeight", value: "null")
             }
         }
-	else if (strResults[0] == "sysinfo") {
+		else if (strResults[0] == "sysinfo") {
 			state.Printer_Model = strResults[1]
 			state.Firmware_Version = strResults[2]
 			state.Serial_No = strResults[3]
 			state.WiFi_SSID = strResults[4]
-	}
+		}
         state.LastResult = "success"
 
     } catch(e) {
