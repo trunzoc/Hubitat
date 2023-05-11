@@ -37,10 +37,10 @@ metadata {
         attribute "TotalLayers", "string"
         attribute "CurrentLayer", "string"
         attribute "PercentComplete", "string"
-        attribute "SecondsEstimated", "string"
-		attribute "SecondsActive", "string"
+        attribute "SecondsEstimated", "number"
+	attribute "SecondsActive", "number"
         attribute "TotalVolume", "string"
-		attribute "LayerHeight", "string"
+	attribute "LayerHeight", "string"
 }
     
 preferences() {    	
