@@ -7,7 +7,8 @@
 *       Date       Who                   What
 *       2023-05-01 Craig Trunzo          Built it
 *       2023-05-09 Craig Trunzo          Added "sysinfo
-*       2023-05-11 Craig Trunzo          changed numeric attributes to strings
+*       2023-05-11 Craig Trunzo          Changed numeric attributes to strings
+*       2023-05-12 Craig Trunzo          Fixed stuff
 *
 *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
 *  in compliance with the License. You may obtain a copy of the License at:
@@ -20,7 +21,9 @@
 *
 *
 */
-def version() {"v1.0.20230511"}
+import java.util.concurrent.TimeUnit
+
+def version() {"v1.0.20230512"}
 
 
 metadata {
@@ -31,16 +34,16 @@ metadata {
 	    command "GetStatus"
 	    command "SystemInfo"
 
-        attribute "LastStatusDate", "string"
         attribute "CurrentStatus", "string"
         attribute "CurrentFile", "string"
-        attribute "TotalLayers", "string"
-        attribute "CurrentLayer", "string"
+        attribute "LastStatusDate", "string"
+		attribute "LayerHeight", "string"
+        attribute "Layers_Total", "string"
+        attribute "Layers_Current", "string"
         attribute "PercentComplete", "string"
-        attribute "SecondsEstimated", "number"
-	attribute "SecondsActive", "number"
+		attribute "Time_Elapsed", "string"
+		attribute "Time_Remaining", "string"
         attribute "TotalVolume", "string"
-	attribute "LayerHeight", "string"
 }
     
 preferences() {    	
@@ -132,12 +135,12 @@ def parse(String msg) {
                 sendEvent(name: "contact", value: "open")
                 sendEvent(name: "LastStatusDate", value: dateNow)
                 sendEvent(name: "CurrentStatus", value: strResults[1])
-                sendEvent(name: "CurrentFile", value: strResults[2])
-                sendEvent(name: "TotalLayers", value: strResults[3])
-                sendEvent(name: "CurrentLayer", value: strResults[5])
+                sendEvent(name: "CurrentFile", value: strResults[2].split('/')[0])
+                sendEvent(name: "Layers_Total", value: strResults[3])
+                sendEvent(name: "Layers_Current", value: strResults[5])
                 sendEvent(name: "PercentComplete", value: "${strResults[4]}%")
-                sendEvent(name: "SecondsEstimated", value: strResults[7])
-                sendEvent(name: "SecondsActive", value: strResults[6])
+                sendEvent(name: "Time_Elapsed", value: SecondsToTime(strResults[6].toInteger()))
+                sendEvent(name: "Time_Remaining", value: SecondsToTime(strResults[7].toInteger()))
                 sendEvent(name: "TotalVolume", value: strResults[8])
                 sendEvent(name: "LayerHeight", value: strResults[11])
             } else {
@@ -147,11 +150,11 @@ def parse(String msg) {
                 sendEvent(name: "CurrentStatus", value: "Not Printing")
             
                 sendEvent(name: "CurrentFile", value: "null")
-                sendEvent(name: "TotalLayers", value: "null")
-                sendEvent(name: "CurrentLayer", value: "null")
+                sendEvent(name: "Layers_Total", value: "null")
+                sendEvent(name: "Layers_Current", value: "null")
                 sendEvent(name: "PercentComplete", value: "null")
-                sendEvent(name: "SecondsEstimated", value: "null")
-                sendEvent(name: "SecondsActive", value: "null")
+                sendEvent(name: "Time_Elapsed", value: "null")
+                sendEvent(name: "Time_Remaining", value: "null")
                 sendEvent(name: "TotalVolume", value: "null")
                 sendEvent(name: "LayerHeight", value: "null")
             }
@@ -182,4 +185,14 @@ def parse(String msg) {
 	} else {
 		if (autoUpdate) runIn(delayCheckIdle.toInteger(), CheckPrinter)
 	}
+}
+
+def SecondsToTime(secondsToConvert) {
+    long millis = secondsToConvert * 1000;
+    long hours = TimeUnit.MILLISECONDS.toHours(millis);
+    long minutes = TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1);
+    long seconds = TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1);
+
+    String timestamp = String.format("%02d H, %02d M, %02d S", Math.abs(hours), Math.abs(minutes), Math.abs(seconds));
+    return timestamp
 }
