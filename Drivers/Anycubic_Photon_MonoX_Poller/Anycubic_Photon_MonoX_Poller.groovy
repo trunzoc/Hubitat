@@ -28,21 +28,21 @@ def version() {"v1.0.20230512"}
 
 metadata {
 	definition (name: "Anycubic Photon Mono X Poller", namespace: "trunzoc", author: "Craig Trunzo", importUrl: "https://raw.githubusercontent.com/trunzoc/Hubitat/master/Drivers/Anycubic_Photon_MonoX_Poller/Anycubic_Photon_MonoX_Poller.groovy") {
-		capability "Contact Sensor"
+	capability "Contact Sensor"
         capability "PresenceSensor"
 
-	    command "GetStatus"
-	    command "SystemInfo"
+    	command "GetStatus"
+    	command "SystemInfo"
 
         attribute "CurrentStatus", "string"
         attribute "CurrentFile", "string"
         attribute "LastStatusDate", "string"
-		attribute "LayerHeight", "string"
+	attribute "LayerHeight", "string"
         attribute "Layers_Total", "string"
         attribute "Layers_Current", "string"
         attribute "PercentComplete", "string"
-		attribute "Time_Elapsed", "string"
-		attribute "Time_Remaining", "string"
+	attribute "Time_Elapsed", "string"
+	attribute "Time_Remaining", "string"
         attribute "TotalVolume", "string"
 }
     
