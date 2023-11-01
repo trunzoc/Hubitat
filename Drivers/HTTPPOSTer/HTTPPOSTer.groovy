@@ -18,7 +18,7 @@
 *
 *
 */
-def version() {"v1.0.20230414"}
+def version() {"v1.0.20230416"}
 
 metadata {
     definition (name: "HTTP POSTer", namespace: "trunzoc", author: "Craig Trunzo", importUrl: "https://raw.githubusercontent.com/trunzoc/Hubitat/master/Drivers/HTTPPOSTer/HTTPPOSTer.groovy") {
