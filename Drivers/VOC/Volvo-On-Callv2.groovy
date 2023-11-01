@@ -26,12 +26,6 @@
 *   - Location for presence
 *   - Lock, Unlock, Preclimatization, Blink Lights, Sound Horn, Engine Start, Engine Stop
 *
-***********************************************************************************************************************/
-
-public static String version()      {  return "v1.1.0"  }
-
-/***********************************************************************************************************************
-*
 * Version: 1.0.0
 *   18/2/2019: initial release.
 *
@@ -39,11 +33,12 @@ public static String version()      {  return "v1.1.0"  }
 *   27/4/2019: Updated for vehicles without hvBattery and added GPS attributes suggested by chrbratt
 *
 */
-
 import groovy.transform.Field
 
+def version() {"v1.0.20220303"}
+
 metadata    {
-    definition (name: "Volvo On Call (VOC) Driver v2", namespace: "filby", author: "Andrew Filby")  {
+    definition (name: "Volvo On Call (VOC) Driver v2", namespace: "trunzoc", author: "Craig Trunzo")  {
 		
 		capability "Actuator"
 		capability "Refresh"
